@@ -226,7 +226,9 @@ public:
             return empty_ptr();
         }
         else {
+            length--;
             nodePtr tempNode = currentNode;
+            ptr_t data = currentNode->data;
             if (currentNode == firstNode) {
                 firstNode = firstNode->nextNode;
                 currentNode = firstNode;
@@ -244,7 +246,7 @@ public:
                 currentNode = afterCurrent;
             }
             delete(tempNode);
-            return currentNode->data;
+            return data;
         }
     }
 
