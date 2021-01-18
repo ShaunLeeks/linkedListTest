@@ -46,14 +46,14 @@ public:
     {
         nodePtr current = firstNode;
         nodePtr nextNode;
-        {
+        while (current){ // This is not O(1) time complexity
             nextNode = current->nextNode;
             delete(current);
             current = nextNode;
         }
         currentNode = nullptr;
-        currentNode = nullptr;
-        currentNode = nullptr;
+        firstNode = nullptr;
+        lastNode = nullptr;
         length = 0;
     }
 
