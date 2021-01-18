@@ -17,15 +17,16 @@ public:
     }
 
 private:
-    typedef struct node {
+   struct node {
         ptr_t data;
-        node* nextNode{ nullptr };
-        node* prevNode{ nullptr };
-    }*nodePtr;
+        std::shared_ptr<node> nextNode{ nullptr };
+        std::weak_ptr<node> prevNode;
+   };
+    typedef std::shared_ptr<node> ptr_node;
 
-    node* currentNode{ nullptr };
-    node* firstNode{ nullptr };
-    node* lastNode{ nullptr };
+    ptr_node currentNode{ nullptr };
+    ptr_node firstNode{ nullptr };
+    ptr_node lastNode{ nullptr };
     size_t length{ 0 };
 
 public:
@@ -44,13 +45,6 @@ public:
     // Clear all elements from list
     void clear()
     {
-        nodePtr current = firstNode;
-        nodePtr nextNode;
-        while (current){ // This is not O(1) time complexity
-            nextNode = current->nextNode;
-            delete(current);
-            current = nextNode;
-        }
         currentNode = nullptr;
         firstNode = nullptr;
         lastNode = nullptr;
@@ -99,8 +93,8 @@ public:
 
     const ptr_t prev()
     {
-        if (currentNode->prevNode) {
-            currentNode = currentNode->prevNode;
+        if (currentNode->prevNode.lock()) {
+            currentNode = currentNode->prevNode.lock();
             return currentNode->data;
         }
         else
@@ -114,7 +108,7 @@ public:
     void push_back(const item_t& item)
     {
         length++;
-        nodePtr newNode{ new node };
+        ptr_node newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
         if (!currentNode) {
@@ -137,7 +131,7 @@ public:
     void push_front(const item_t& item)
     {
         length++;
-        nodePtr newNode{ new node };
+        ptr_node newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
         if (!currentNode) {
@@ -165,12 +159,12 @@ public:
             return empty_ptr();
         }
         length++;
-        nodePtr newNode{ new node };
+        ptr_node newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
         if (currentNode != firstNode)
         {
-            nodePtr beforeCurrent = currentNode->prevNode;
+            ptr_node beforeCurrent = currentNode->prevNode.lock();
 
             beforeCurrent->nextNode = newNode;
             newNode->prevNode = beforeCurrent;
@@ -195,12 +189,12 @@ public:
             return empty_ptr();
         }
         length++;
-        nodePtr newNode{ new node };
+        ptr_node newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
         if (currentNode != lastNode)
         {
-            nodePtr afterCurrent = currentNode->nextNode;
+            ptr_node afterCurrent = currentNode->nextNode;
 
             afterCurrent->prevNode = newNode;
             newNode->nextNode = afterCurrent;
@@ -211,7 +205,7 @@ public:
 
         currentNode = newNode;
 
-        return currentNode->prevNode->data;
+        return currentNode->prevNode.lock()->data;
     }
 
     // Remove the current item from the list
@@ -227,25 +221,24 @@ public:
         }
         else {
             length--;
-            nodePtr tempNode = currentNode;
+            ptr_node tempNode = currentNode;
             ptr_t data = currentNode->data;
             if (currentNode == firstNode) {
                 firstNode = firstNode->nextNode;
                 currentNode = firstNode;
             }
             else if (currentNode == lastNode) {
-                lastNode = lastNode->prevNode;
+                lastNode = lastNode->prevNode.lock();
                 currentNode = lastNode;
             }
             else {
-                nodePtr beforeCurrent = currentNode->prevNode;
-                nodePtr afterCurrent = currentNode->nextNode;
+                ptr_node beforeCurrent = currentNode->prevNode.lock();
+                ptr_node afterCurrent = currentNode->nextNode;
 
                 beforeCurrent->nextNode = afterCurrent;
                 afterCurrent->prevNode = beforeCurrent;
                 currentNode = afterCurrent;
             }
-            delete(tempNode);
             return data;
         }
     }
