@@ -383,7 +383,8 @@ int main(int argc, char** argv)
     item = ll.removeCurrent();
     assert(*item == 50);
     assert(ll.size() == 10);
-    assert(ll.current() == 5);
+    assert(ll.current() == 6); // Was 5 but I think that is wrong. 
+    //As removeCurrent moves current to next node which is 6.
 
     cerr << "Test last and prev...";
     item = ll.last();
