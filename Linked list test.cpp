@@ -164,6 +164,7 @@ public:
             push_front(item);
             return empty_ptr();
         }
+        length++;
         nodePtr newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
@@ -193,6 +194,7 @@ public:
             push_front(item);
             return empty_ptr();
         }
+        length++;
         nodePtr newNode{ new node };
         newNode->data = std::make_shared<T>(item); // check this
 
